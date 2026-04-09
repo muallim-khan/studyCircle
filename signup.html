@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>StudyCircle | Sign Up</title>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    //  FIREBASE CONFIGURATION 🔥
+    // const firebaseConfig = {
+    //   apiKey: "YOUR_API_KEY",
+    //   authDomain: "YOUR_AUTH_DOMAIN",
+    //   projectId: "YOUR_PROJECT_ID",
+    //   storageBucket: "YOUR_STORAGE_BUCKET",
+    //   messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    //   appId: "YOUR_APP_ID"
+    // };
+    const firebaseConfig = {
+  apiKey: "AIzaSyCFWJYM-fALa1hm927FtkofZY0Q1V8dhx8",
+  authDomain: "medicine-monitoring.firebaseapp.com",
+  projectId: "medicine-monitoring",
+  storageBucket: "medicine-monitoring.firebasestorage.app",
+  messagingSenderId: "1091737782608",
+  appId: "1:1091737782608:web:13620a31dcf2b36ed10455",
+  measurementId: "G-JFC0E5BV7R"
+};
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // DOM elements
+    const signupForm = document.getElementById('signupForm');
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const subjectInput = document.getElementById('subject');
+    const phoneInput = document.getElementById('phone');
+    const locationInput = document.getElementById('location');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+
+    // Helper to show error
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+      setTimeout(() => { errorMessage.style.display = 'none'; }, 5000);
+    }
+
+    function showSuccess(msg) {
+      successMessage.textContent = msg;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+      setTimeout(() => { successMessage.style.display = 'none'; }, 5000);
+    }
+
+    // Signup handler
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Get values
+      const fullName = fullNameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      const subject = subjectInput.value.trim();
+      const phone = phoneInput.value.trim();
+      const location = locationInput.value.trim();
+
+      // Validation
+      if (!fullName || !email || !password || !confirmPassword || !subject || !phone || !location) {
+        showError('❌ Please fill in all fields.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        showError('❌ Passwords do not match.');
+        return;
+      }
+      if (password.length < 6) {
+        showError('❌ Password must be at least 6 characters.');
+        return;
+      }
+      const emailPattern = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+      if (!emailPattern.test(email)) {
+        showError('❌ Please enter a valid email address.');
+        return;
+      }
+
+      // Disable button during submission
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creating account...';
+
+      try {
+        // 1. Create user with email & password
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 2. Save additional user data to Firestore (users collection)
+        // geoLocation is left empty for now – can be updated later after login
+        await setDoc(doc(db, "users", user.uid), {
+          fullName: fullName,
+          email: email,
+          subject: subject,
+          phone: phone,
+          location: location,
+          geoLocation: "",   // empty field, to be updated after login with actual coordinates
+          createdAt: new Date().toISOString(),
+          uid: user.uid
+        });
+
+        showSuccess('✅ Account created successfully! Redirecting to dashboard...');
+        
+        // Redirect to dashboard after short delay
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1500);
+        
+      } catch (error) {
+        console.error(error);
+        let errorMsg = error.message;
+        if (error.code === 'auth/email-already-in-use') {
+          errorMsg = '⚠️ This email is already registered. Try logging in.';
+        } else if (error.code === 'auth/weak-password') {
+          errorMsg = '⚠️ Password is too weak. Use at least 6 characters.';
+        }
+        showError(`❌ Signup failed: ${errorMsg}`);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Sign Up';
+      }
+    });
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, 'Segoe UI', 'Inter', 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f9fafc 0%, #ffffff 100%);
+      color: #1a2c3e;
+      min-height: 100vh;
+    }
+
+    /* reuse same color palette */
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --gray-light: #f8fafc;
+      --gray-border: #e2e8f0;
+      --card-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.08);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* header / nav similar to landing */
+    .navbar {
+      background: white;
+      border-bottom: 1px solid var(--gray-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: rgba(255, 255, 255, 0.96);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+      color: var(--accent);
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 500;
+      color: #1e293b;
+      margin-left: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    /* signup card */
+    .signup-card {
+      max-width: 700px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 2rem;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--gray-border);
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+      padding: 1.8rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid var(--gray-border);
+    }
+
+    .card-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--secondary);
+    }
+
+    .card-header p {
+      color: #475569;
+      margin-top: 0.5rem;
+    }
+
+    .card-body {
+      padding: 2rem 2rem 2.5rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      flex: 1;
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #1e293b;
+      font-size: 0.9rem;
+    }
+
+    .form-group label i {
+      color: var(--primary);
+      width: 1.4rem;
+    }
+
+    .form-group input, 
+    .form-group select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--gray-border);
+      border-radius: 1rem;
+      font-family: inherit;
+      transition: 0.2s;
+      background: #fefefe;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+
+    .btn-signup {
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 0.9rem;
+      border-radius: 3rem;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+
+    .btn-signup:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(59,130,246,0.3);
+    }
+
+    .login-redirect {
+      text-align: center;
+      margin-top: 1.8rem;
+      font-size: 0.95rem;
+    }
+
+    .login-redirect a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .login-redirect a:hover {
+      text-decoration: underline;
+    }
+
+    .alert {
+      padding: 0.8rem 1rem;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      font-weight: 500;
+    }
+
+    .alert-error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-left: 5px solid #ef4444;
+    }
+
+    .alert-success {
+      background: #dcfce7;
+      color: #15803d;
+      border-left: 5px solid #22c55e;
+    }
+
+    .footer {
+      background: #0f172a;
+      color: #cbd5e1;
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 650px) {
+      .card-body {
+        padding: 1.5rem;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .nav-container {
+        flex-direction: column;
+      }
+      .nav-links a {
+        margin: 0 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fas fa-users"></i>
+        <span>StudyCircle</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="signup-card">
+      <div class="card-header">
+        <h1><i class="fas fa-user-graduate"></i> Join StudyCircle</h1>
+        <p>Create your account and start collaborating</p>
+      </div>
+      <div class="card-body">
+        <!-- Alert messages -->
+        <div id="errorMessage" class="alert alert-error"></div>
+        <div id="successMessage" class="alert alert-success"></div>
+
+        <form id="signupForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> Full Name *</label>
+              <input type="text" id="fullName" placeholder="e.g., Aisha Patel" autocomplete="name">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-envelope"></i> Email *</label>
+              <input type="email" id="email" placeholder="student@university.com" autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-lock"></i> Password *</label>
+              <input type="password" id="password" placeholder="At least 6 characters" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-check-circle"></i> Confirm Password *</label>
+              <input type="password" id="confirmPassword" placeholder="Retype password">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-book-open"></i> Favorite Subject *</label>
+              <input type="text" id="subject" placeholder="e.g., Mathematics, Physics, Literature">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-phone-alt"></i> Phone Number *</label>
+              <input type="tel" id="phone" placeholder="+234 801 234 5678">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-map-marker-alt"></i> Location / Campus *</label>
+              <input type="text" id="location" placeholder="e.g., Zaria, Abuja, Lagos">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-globe"></i> Geo Location (auto-updated later)</label>
+              <input type="text" id="geoLocation" placeholder="Will be filled after login" disabled style="background:#f1f5f9; color:#475569;">
+              <small style="font-size:0.7rem; color:#64748b;"><i class="fas fa-info-circle"></i> We'll update your precise location after you log in.</small>
+            </div>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</button>
+        </form>
+
+        <div class="login-redirect">
+          Already have an account? <a href="login.html">Log in here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p><i class="fas fa-graduation-cap"></i> StudyCircle — connect, share, succeed</p>
+    <small>© 2025 StudyCircle Team</small>
+  </footer>
+
+  <script type="module">
+    // Additional note: The main Firebase logic is already inside the module script at the top.
+    // This extra script ensures that disabled geo field is just informative.
+    console.log("Signup page ready — Firebase integration active (config required)");
+  </script>
+</body>
+</html>

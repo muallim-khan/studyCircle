@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyCircle | Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script type="module">
+    // 🔥 REPLACE WITH YOUR FIREBASE CONFIGURATION 🔥
+  const firebaseConfig = {
+  apiKey: "AIzaSyCFWJYM-fALa1hm927FtkofZY0Q1V8dhx8",
+  authDomain: "medicine-monitoring.firebaseapp.com",
+  projectId: "medicine-monitoring",
+  storageBucket: "medicine-monitoring.firebasestorage.app",
+  messagingSenderId: "1091737782608",
+  appId: "1:1091737782608:web:13620a31dcf2b36ed10455",
+  measurementId: "G-JFC0E5BV7R"
+};
+
+
+    // Warn if opened via file:// protocol (CORS issue)
+    if (window.location.protocol === 'file:') {
+      alert("⚠️ CORS ERROR: You must use a local web server (e.g., Live Server in VS Code).\n\nOpen this file via http://localhost:xxxx/login.html");
+      document.body.innerHTML = '<div style="text-align:center; padding:3rem; font-family:sans-serif;"><h2>⚠️ CORS / Security Error</h2><p>You opened this page directly from your file system (file://).<br>Firebase requires a web server.<br><br><strong>Solution:</strong> Use VS Code Live Server or run <code>npx http-server</code> in this folder.</p></div>';
+      throw new Error("File protocol not supported");
+    }
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // DOM elements
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const forgotPasswordLink = document.getElementById('forgotPassword');
+
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+      setTimeout(() => { errorMessage.style.display = 'none'; }, 5000);
+    }
+
+    function showSuccess(msg) {
+      successMessage.textContent = msg;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+      setTimeout(() => { successMessage.style.display = 'none'; }, 4000);
+    }
+
+    // Login handler
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        showError('❌ Please enter both email and password.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Logging in...';
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showSuccess('✅ Login successful! Redirecting to dashboard...');
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1200);
+      } catch (error) {
+        console.error("Login error:", error);
+        let userMsg = error.message;
+        if (error.code === 'auth/user-not-found') {
+          userMsg = 'No account found with this email. Please sign up first.';
+        } else if (error.code === 'auth/wrong-password') {
+          userMsg = 'Incorrect password. Please try again.';
+        } else if (error.code === 'auth/invalid-email') {
+          userMsg = 'Invalid email format.';
+        } else if (error.message.includes('CORS') || error.message.includes('Network')) {
+          userMsg = '⚠️ Network/CORS error. Make sure you are using a local server (Live Server).';
+        }
+        showError(`❌ Login failed: ${userMsg}`);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+      }
+    });
+
+    // Forgot password (send reset email)
+    forgotPasswordLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      if (!email) {
+        showError('Please enter your email address first.');
+        return;
+      }
+      
+      // Disable link temporarily
+      forgotPasswordLink.style.pointerEvents = 'none';
+      forgotPasswordLink.style.opacity = '0.6';
+      
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showSuccess(`📧 Password reset email sent to ${email}. Check your inbox.`);
+      } catch (error) {
+        console.error(error);
+        let msg = error.message;
+        if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
+        showError(`❌ ${msg}`);
+      } finally {
+        setTimeout(() => {
+          forgotPasswordLink.style.pointerEvents = 'auto';
+          forgotPasswordLink.style.opacity = '1';
+        }, 3000);
+      }
+    });
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, 'Segoe UI', 'Inter', sans-serif; background: linear-gradient(135deg, #f9fafc 0%, #ffffff 100%); color: #1a2c3e; min-height: 100vh; }
+    :root { --primary: #3b82f6; --primary-dark: #2563eb; --accent: #f59e0b; --gray-border: #e2e8f0; }
+    .navbar { background: white; border-bottom: 1px solid var(--gray-border); position: sticky; top: 0; z-index: 10; }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; max-width: 1280px; margin: 0 auto; flex-wrap: wrap; gap: 1rem; }
+    .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem; font-weight: 700; color: var(--primary); }
+    .logo i { font-size: 1.8rem; color: var(--accent); }
+    .nav-links a { text-decoration: none; font-weight: 500; color: #1e293b; margin-left: 1.5rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .login-card { max-width: 500px; margin: 3rem auto; background: white; border-radius: 2rem; box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.08); border: 1px solid var(--gray-border); overflow: hidden; }
+    .card-header { background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); padding: 1.8rem 2rem; text-align: center; border-bottom: 1px solid var(--gray-border); }
+    .card-header h1 { font-size: 2rem; font-weight: 700; color: #0f172a; }
+    .card-header p { color: #475569; margin-top: 0.5rem; }
+    .card-body { padding: 2rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; }
+    .form-group label i { color: var(--primary); width: 1.6rem; }
+    .form-group input { width: 100%; padding: 0.85rem 1rem; border: 1px solid var(--gray-border); border-radius: 1rem; font-family: inherit; transition: 0.2s; }
+    .form-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .btn-login { background: var(--primary); color: white; border: none; width: 100%; padding: 0.9rem; border-radius: 3rem; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-top: 0.5rem; }
+    .btn-login:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(59,130,246,0.3); }
+    .extra-links { display: flex; justify-content: space-between; margin-top: 1.2rem; font-size: 0.9rem; }
+    .extra-links a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .extra-links a:hover { text-decoration: underline; }
+    .signup-redirect { text-align: center; margin-top: 1.8rem; font-size: 0.95rem; border-top: 1px solid var(--gray-border); padding-top: 1.5rem; }
+    .signup-redirect a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .alert { padding: 0.8rem 1rem; border-radius: 1rem; margin-bottom: 1.5rem; display: none; font-weight: 500; }
+    .alert-error { background: #fee2e2; color: #b91c1c; border-left: 5px solid #ef4444; }
+    .alert-success { background: #dcfce7; color: #15803d; border-left: 5px solid #22c55e; }
+    .footer { background: #0f172a; color: #cbd5e1; text-align: center; padding: 1.5rem; margin-top: 3rem; }
+    @media (max-width: 600px) { .card-body { padding: 1.5rem; } .nav-container { flex-direction: column; } .nav-links a { margin: 0 0.8rem; } }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo"><i class="fas fa-users"></i><span>StudyCircle</span></div>
+      <div class="nav-links"><a href="index.html"><i class="fas fa-home"></i> Home</a><a href="signup.html"><i class="fas fa-user-plus"></i> Sign Up</a></div>
+    </div>
+  </header>
+
+  <div style="max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
+    <div class="login-card">
+      <div class="card-header">
+        <h1><i class="fas fa-sign-in-alt"></i> Welcome Back</h1>
+        <p>Login to access your study groups</p>
+      </div>
+      <div class="card-body">
+        <div id="errorMessage" class="alert alert-error"></div>
+        <div id="successMessage" class="alert alert-success"></div>
+        
+        <form id="loginForm">
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email Address</label>
+            <input type="email" id="email" placeholder="student@university.com" autocomplete="email" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+          </div>
+          <button type="submit" id="submitBtn" class="btn-login"><i class="fas fa-sign-in-alt"></i> Login</button>
+          <div class="extra-links">
+            <a href="#" id="forgotPassword"><i class="fas fa-key"></i> Forgot password?</a>
+          </div>
+        </form>
+        
+        <div class="signup-redirect">
+          Don't have an account? <a href="signup.html">Create one now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p><i class="fas fa-graduation-cap"></i> StudyCircle — connect, share, succeed</p>
+    <small>© 2025 StudyCircle Team</small>
+  </footer>
+</body>
+</html>

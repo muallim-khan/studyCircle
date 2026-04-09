@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyCircle | Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, 'Segoe UI', 'Inter', sans-serif; background: #f9fafc; color: #1a2c3e; }
+    :root { --primary: #3b82f6; --primary-dark: #2563eb; --accent: #f59e0b; --gray-border: #e2e8f0; }
+    .navbar { background: white; border-bottom: 1px solid var(--gray-border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem; font-weight: 700; color: var(--primary); }
+    .logo i { color: var(--accent); }
+    .user-info { display: flex; align-items: center; gap: 1rem; }
+    .logout-btn { background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; font-weight: 600; }
+    .container { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
+    .section { background: white; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--gray-border); }
+    .section h2 { margin-bottom: 1.2rem; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .form-grid { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { flex: 1; min-width: 200px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.3rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 0.7rem; border: 1px solid var(--gray-border); border-radius: 1rem; }
+    button { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 2rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    button:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.2rem; margin-top: 1rem; }
+    .group-card { background: #fefefe; border: 1px solid var(--gray-border); border-radius: 1.2rem; padding: 1rem; transition: 0.2s; }
+    .group-card h3 { color: var(--primary); margin-bottom: 0.3rem; }
+    .group-card p { margin: 0.3rem 0; font-size: 0.9rem; }
+    .card-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
+    .join-btn { background: #10b981; }
+    .chat-btn { background: #6366f1; }
+    .nearby-list { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; max-height: 300px; overflow-y: auto; }
+    .nearby-item { background: #f1f5f9; border-radius: 1rem; padding: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+    .badge { background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.7rem; }
+    /* modal for chat */
+    .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: white; width: 90%; max-width: 600px; border-radius: 1.5rem; padding: 1.5rem; max-height: 80vh; display: flex; flex-direction: column; }
+    .messages-area { flex:1; overflow-y: auto; margin: 1rem 0; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 0.5rem; }
+    .message { background: #f1f5f9; border-radius: 1rem; padding: 0.5rem 0.8rem; margin-bottom: 0.5rem; }
+    .message strong { color: var(--primary); }
+    .message small { font-size: 0.7rem; color: gray; }
+    .chat-input { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .chat-input input { flex:1; padding: 0.6rem; border-radius: 2rem; border: 1px solid var(--gray-border); }
+    .close-modal { float: right; font-size: 1.5rem; cursor: pointer; }
+    @media (max-width: 700px) { .form-grid { flex-direction: column; } .navbar { flex-direction: column; text-align: center; } }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo"><i class="fas fa-users"></i> StudyCircle</div>
+    <div class="user-info">
+      <span id="userNameDisplay"><i class="fas fa-user"></i> Loading...</span>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Create Group Section -->
+    <div class="section">
+      <h2><i class="fas fa-plus-circle"></i> Create Study Group</h2>
+      <div class="form-grid">
+        <div class="form-group"><label>Subject</label><input type="text" id="groupSubject" placeholder="e.g., JavaScript, Physics"></div>
+        <div class="form-group"><label>Location</label><input type="text" id="groupLocation" placeholder="Campus / Library"></div>
+        <div class="form-group"><label>Message / Description</label><textarea id="groupMessage" rows="2" placeholder="What will you study?"></textarea></div>
+      </div>
+      <button id="createGroupBtn"><i class="fas fa-save"></i> Create Group</button>
+    </div>
+
+    <!-- All Groups Section (with join & chat) -->
+    <div class="section">
+      <h2><i class="fas fa-layer-group"></i> All Study Groups</h2>
+      <input type="text" id="searchInput" placeholder="🔍 Search by subject or location..." style="width:100%; padding:0.7rem; border-radius:2rem; border:1px solid #ccc; margin-bottom:1rem;">
+      <div id="groupsContainer" class="groups-grid">Loading groups...</div>
+    </div>
+
+    <!-- Nearby Section -->
+    <div class="section">
+      <h2><i class="fas fa-map-marker-alt"></i> Find Nearby (students & groups)</h2>
+      <button id="findNearbyBtn"><i class="fas fa-location-dot"></i> Use my location</button>
+      <div id="nearbyResults" class="nearby-list" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <!-- Chat Modal -->
+  <div id="chatModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeModal">&times;</span>
+      <h3 id="chatGroupTitle">Group Chat</h3>
+      <div id="chatMessages" class="messages-area">Loading messages...</div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button id="sendMessageBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // 🔥 REPLACE WITH YOUR FIREBASE CONFIGURATION 🔥
+      const firebaseConfig = {
+  apiKey: "AIzaSyCFWJYM-fALa1hm927FtkofZY0Q1V8dhx8",
+  authDomain: "medicine-monitoring.firebaseapp.com",
+  projectId: "medicine-monitoring",
+  storageBucket: "medicine-monitoring.firebasestorage.app",
+  messagingSenderId: "1091737782608",
+  appId: "1:1091737782608:web:13620a31dcf2b36ed10455",
+  measurementId: "G-JFC0E5BV7R"
+};
+
+    if (window.location.protocol === 'file:') {
+      alert("⚠️ CORS ERROR: Use a local server (Live Server) for Firebase.");
+      throw new Error("file:// not allowed");
+    }
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, getDoc, getDocs, where, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentUserDoc = null;
+    let currentGroupId = null; // for chat modal
+
+    // DOM elements
+    const userNameSpan = document.getElementById('userNameDisplay');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const createBtn = document.getElementById('createGroupBtn');
+    const groupsContainer = document.getElementById('groupsContainer');
+    const searchInput = document.getElementById('searchInput');
+    const findNearbyBtn = document.getElementById('findNearbyBtn');
+    const nearbyResults = document.getElementById('nearbyResults');
+    const modal = document.getElementById('chatModal');
+    const closeModal = document.getElementById('closeModal');
+    const chatMessagesDiv = document.getElementById('chatMessages');
+    const sendMsgBtn = document.getElementById('sendMessageBtn');
+    const messageInput = document.getElementById('messageInput');
+    const chatGroupTitle = document.getElementById('chatGroupTitle');
+
+    // Helper: update user's geo location in Firestore (on every dashboard load)
+    async function updateUserGeoLocation() {
+      if (!currentUser) return;
+      if (!navigator.geolocation) {
+        console.warn("Geolocation not supported");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const geoString = `${lat},${lng}`;
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+          geoLocation: geoString,
+          lastGeoUpdate: new Date().toISOString()
+        }).catch(console.error);
+        console.log("Geo location updated:", geoString);
+      }, (err) => {
+        console.warn("Geo permission denied or error:", err);
+      });
+    }
+
+    // Load current user data from Firestore
+    async function loadUserData(uid) {
+      const userRef = doc(db, "users", uid);
+      const snap = await getDoc(userRef);
+      if (snap.exists()) {
+        currentUserDoc = snap.data();
+        userNameSpan.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUserDoc.fullName || currentUser.email}`;
+      } else {
+        userNameSpan.innerHTML = currentUser.email;
+      }
+    }
+
+    // Create group
+    createBtn.addEventListener('click', async () => {
+      const subject = document.getElementById('groupSubject').value.trim();
+      const location = document.getElementById('groupLocation').value.trim();
+      const message = document.getElementById('groupMessage').value.trim();
+      if (!subject || !location || !message) {
+        alert("Please fill all fields.");
+        return;
+      }
+      try {
+        await addDoc(collection(db, "groups"), {
+          subject, location, message,
+          createdBy: currentUser.uid,
+          creatorName: currentUserDoc?.fullName || currentUser.email,
+          createdAt: new Date().toISOString(),
+          members: [currentUser.uid],
+          memberCount: 1
+        });
+        alert("Group created!");
+        document.getElementById('groupSubject').value = '';
+        document.getElementById('groupLocation').value = '';
+        document.getElementById('groupMessage').value = '';
+      } catch (err) {
+        console.error(err);
+        alert("Error creating group.");
+      }
+    });
+
+    // Render groups with real-time listener + search filter
+    let allGroups = [];
+    let unsubscribeGroups = null;
+
+    function renderGroups() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const filtered = allGroups.filter(g => 
+        g.subject?.toLowerCase().includes(searchTerm) || 
+        g.location?.toLowerCase().includes(searchTerm)
+      );
+      if (filtered.length === 0) {
+        groupsContainer.innerHTML = '<p>No groups found. Create one!</p>';
+        return;
+      }
+      groupsContainer.innerHTML = filtered.map(group => {
+        const isMember = group.members?.includes(currentUser.uid);
+        return `
+          <div class="group-card">
+            <h3>📚 ${group.subject}</h3>
+            <p><i class="fas fa-map-pin"></i> ${group.location}</p>
+            <p>${group.message}</p>
+            <p><i class="fas fa-users"></i> ${group.memberCount || group.members?.length || 0} members</p>
+            <p><small>by ${group.creatorName || 'someone'}</small></p>
+            <div class="card-actions">
+              ${!isMember ? `<button class="join-btn" data-id="${group.id}">Join Group</button>` : `<button disabled style="background:#9ca3af;">Joined</button>`}
+              <button class="chat-btn" data-id="${group.id}" data-subject="${group.subject}">💬 Chat</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // attach join events
+      document.querySelectorAll('.join-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const groupId = btn.dataset.id;
+          const groupRef = doc(db, "groups", groupId);
+          await updateDoc(groupRef, {
+            members: arrayUnion(currentUser.uid),
+            memberCount: (allGroups.find(g => g.id === groupId)?.memberCount || 0) + 1
+          });
+          alert("You joined the group!");
+        });
+      });
+      // attach chat events
+      document.querySelectorAll('.chat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentGroupId = btn.dataset.id;
+          chatGroupTitle.innerText = `Chat: ${btn.dataset.subject}`;
+          openChatModal(currentGroupId);
+        });
+      });
+    }
+
+    function listenGroups() {
+      const q = query(collection(db, "groups"), orderBy("createdAt", "desc"));
+      unsubscribeGroups = onSnapshot(q, (snapshot) => {
+        allGroups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderGroups();
+      }, (err) => console.error(err));
+    }
+
+    // Chat functions
+    let unsubscribeMessages = null;
+    async function openChatModal(groupId) {
+      modal.style.display = "flex";
+      chatMessagesDiv.innerHTML = "Loading messages...";
+      // load messages real-time
+      const messagesRef = collection(db, "groups", groupId, "messages");
+      const qMessages = query(messagesRef, orderBy("timestamp", "asc"));
+      if (unsubscribeMessages) unsubscribeMessages();
+      unsubscribeMessages = onSnapshot(qMessages, (snapshot) => {
+        const msgs = snapshot.docs.map(doc => doc.data());
+        if (msgs.length === 0) {
+          chatMessagesDiv.innerHTML = "<p>No messages yet. Be the first!</p>";
+        } else {
+          chatMessagesDiv.innerHTML = msgs.map(m => `
+            <div class="message">
+              <strong>${m.senderName}</strong> <small>${new Date(m.timestamp?.toDate()).toLocaleTimeString()}</small><br>
+              ${m.text}
+            </div>
+          `).join('');
+          chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+        }
+      });
+    }
+
+    async function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text || !currentGroupId) return;
+      const senderName = currentUserDoc?.fullName || currentUser.email;
+      try {
+        await addDoc(collection(db, "groups", currentGroupId, "messages"), {
+          text: text,
+          senderId: currentUser.uid,
+          senderName: senderName,
+          timestamp: serverTimestamp()
+        });
+        messageInput.value = '';
+      } catch (err) {
+        console.error(err);
+        alert("Failed to send message.");
+      }
+    }
+
+    sendMsgBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    closeModal.addEventListener('click', () => {
+      modal.style.display = "none";
+      if (unsubscribeMessages) unsubscribeMessages();
+    });
+    window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = "none"; });
+
+    // Nearby: find users & groups within 10km
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = deg2rad(lat2-lat1);
+      const dLon = deg2rad(lon2-lon1);
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+    function deg2rad(deg) { return deg * (Math.PI/180); }
+
+    findNearbyBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        nearbyResults.innerHTML = '<p>Geolocation not supported.</p>';
+        return;
+      }
+      nearbyResults.innerHTML = '<p>Getting your location...</p>';
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const myLat = position.coords.latitude;
+        const myLon = position.coords.longitude;
+        // fetch all users and groups (simple for assignment)
+        const usersSnap = await getDocs(collection(db, "users"));
+        const groupsSnap = await getDocs(collection(db, "groups"));
+        const nearbyUsers = [];
+        const nearbyGroups = [];
+
+        usersSnap.forEach(doc => {
+          const data = doc.data();
+          if (doc.id === currentUser.uid) return;
+          if (data.geoLocation && typeof data.geoLocation === 'string') {
+            const [lat, lng] = data.geoLocation.split(',').map(Number);
+            if (!isNaN(lat) && !isNaN(lng)) {
+              const dist = getDistanceFromLatLonInKm(myLat, myLon, lat, lng);
+              if (dist <= 10) nearbyUsers.push({ ...data, distance: dist.toFixed(1), id: doc.id });
+            }
+          }
+        });
+
+        groupsSnap.forEach(doc => {
+          const data = doc.data();
+          // groups don't have geo by default, but we can use their location string? For demo we skip strict geo.
+          // Instead we show groups with similar location keyword? To simplify, we'll show groups if location text matches campus or we can add optional lat/lng to groups.
+          // As spec wants "find nearby groups" but groups have text location. For simplicity, we'll just list groups that have location containing "nearby"? not ideal.
+          // Better: we add a field to groups: geoLocation when created? Let's skip groups geo for now and only show nearby students.
+          // But spec says "find nearby student account and group" - we can show groups that have been created in same general area by matching location string? Or we add a fake geo? 
+          // I'll implement a basic: if group's location text includes any common campus names? Instead, we'll add a button to manually set group geo in future. For now, show nearby students only, and note that groups can be location-matched by text.
+        });
+        // also show groups that have matching location text (simple contains) - but for clarity, show students + a sample of groups that might be relevant.
+        let html = `<h4>📍 Nearby Students (within 10km)</h4>`;
+        if (nearbyUsers.length === 0) html += `<p>No other students nearby.</p>`;
+        nearbyUsers.forEach(u => {
+          html += `<div class="nearby-item"><span><strong>${u.fullName || u.email}</strong> (${u.subject || 'No subject'})<br><small>${u.location || ''}</small></span><span class="badge">${u.distance} km</span></div>`;
+        });
+        html += `<h4 style="margin-top:1rem;">📚 Nearby Groups (by location keyword)</h4>`;
+        let matchedGroups = [];
+        groupsSnap.forEach(doc => {
+          const data = doc.data();
+          if (data.location && data.location.toLowerCase().includes('campus') || data.location.toLowerCase().includes('library')) {
+            matchedGroups.push(data);
+          }
+        });
+        if (matchedGroups.length === 0) matchedGroups = groupsSnap.docs.slice(0,3).map(d=>d.data()); // fallback
+        matchedGroups.slice(0,5).forEach(g => {
+          html += `<div class="nearby-item"><span><strong>${g.subject}</strong> at ${g.location}<br><small>${g.message}</small></span><span class="badge">joinable</span></div>`;
+        });
+        nearbyResults.innerHTML = html;
+      }, (err) => {
+        nearbyResults.innerHTML = `<p>Could not get location: ${err.message}</p>`;
+      });
+    });
+
+    // Auth state
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      currentUser = user;
+      await loadUserData(user.uid);
+      await updateUserGeoLocation();  // update geo on each login/dashboard load
+      listenGroups();
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>

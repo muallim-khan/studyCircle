@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>StudyCircle | Connect & Collaborate</title>
+  <!-- Font Awesome 6 (free icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, 'Segoe UI', 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      background-color: #fbfdfe;
+      color: #1a2c3e;
+      scroll-behavior: smooth;
+      line-height: 1.5;
+    }
+
+    /* color palette */
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --gray-light: #f8fafc;
+      --gray-border: #e2e8f0;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+      --hover-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* container */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* header & nav */
+    .navbar {
+      background: white;
+      backdrop-filter: blur(0px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      border-bottom: 1px solid var(--gray-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background-color: rgba(255, 255, 255, 0.96);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.8rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 500;
+      color: #1e293b;
+      transition: color 0.2s;
+      font-size: 1rem;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .btn-outline-nav {
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      color: var(--primary);
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-outline-nav:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .btn-solid-nav {
+      background: var(--primary);
+      border: none;
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+      color: white;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-solid-nav:hover {
+      background: var(--primary-dark);
+      transform: scale(0.97);
+    }
+
+    /* buttons general */
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(59,130,246,0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      padding: 0.75rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #eff6ff;
+      transform: translateY(-2px);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 4rem 0 5rem;
+      background: linear-gradient(135deg, #f9fafc 0%, #ffffff 100%);
+    }
+
+    .hero-grid {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    .hero-content {
+      flex: 1.2;
+    }
+
+    .hero-badge {
+      background: #eef2ff;
+      color: var(--primary-dark);
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero-content h1 {
+      font-size: 3.2rem;
+      line-height: 1.2;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 1rem;
+    }
+
+    .hero-highlight {
+      color: var(--primary);
+    }
+
+    .hero-content p {
+      font-size: 1.2rem;
+      color: #334155;
+      margin-bottom: 2rem;
+      max-width: 90%;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-illustration {
+      flex: 0.9;
+      background: #eef2ff80;
+      border-radius: 3rem;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .hero-illustration i {
+      font-size: 12rem;
+      color: var(--primary);
+      opacity: 0.8;
+    }
+
+    /* sections */
+    section {
+      padding: 5rem 0;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #0f172a;
+    }
+
+    .section-sub {
+      text-align: center;
+      color: #475569;
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      font-size: 1.1rem;
+    }
+
+    /* about grid */
+    .about-grid {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .about-text {
+      flex: 1;
+    }
+
+    .about-text p {
+      margin-bottom: 1.2rem;
+      color: #334155;
+      font-size: 1.05rem;
+    }
+
+    .about-feature {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      align-items: center;
+    }
+
+    .about-feature i {
+      font-size: 1.8rem;
+      color: var(--primary);
+    }
+
+    .about-stats {
+      flex: 1;
+      background: var(--gray-light);
+      border-radius: 2rem;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* team cards */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    .team-card {
+      background: white;
+      border-radius: 2rem;
+      padding: 1.8rem 1rem;
+      text-align: center;
+      transition: all 0.25s;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--gray-border);
+    }
+
+    .team-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .team-icon {
+      font-size: 4rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .team-card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .team-role {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.8rem;
+    }
+
+    .team-bio {
+      font-size: 0.9rem;
+      color: #475569;
+      padding: 0 0.5rem;
+    }
+
+    /* contact form */
+    .contact-wrapper {
+      background: white;
+      border-radius: 2rem;
+      box-shadow: var(--card-shadow);
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid var(--gray-border);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #1e293b;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--gray-border);
+      border-radius: 1.2rem;
+      font-family: inherit;
+      transition: 0.2s;
+      background: #fefefe;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 3rem;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 1rem;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-dark);
+    }
+
+    /* footer */
+    .footer {
+      background: #0f172a;
+      color: #cbd5e1;
+      padding: 2rem 0;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .footer p {
+      margin: 0.5rem 0;
+    }
+
+    /* responsive */
+    @media (max-width: 850px) {
+      .hero-content h1 {
+        font-size: 2.4rem;
+      }
+      .hero-content p {
+        max-width: 100%;
+      }
+      .nav-container {
+        flex-direction: column;
+      }
+      .nav-links {
+        justify-content: center;
+      }
+      .about-stats {
+        grid-template-columns: 1fr;
+      }
+      .section-title {
+        font-size: 1.9rem;
+      }
+      .hero-illustration i {
+        font-size: 8rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-buttons {
+        justify-content: center;
+      }
+      .hero-content h1 {
+        text-align: center;
+      }
+      .hero-content p {
+        text-align: center;
+      }
+      .hero-badge {
+        display: block;
+        text-align: center;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .container {
+        padding: 0 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fas fa-users"></i>
+        <span>StudyCircle</span>
+      </div>
+      <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#team">Team</a>
+        <a href="#contact">Contact</a>
+        <a href="login.html" id="navLognBtn" class="btn-outline-nav"><i class="fas fa-sign-in-alt"></i> Login</a>
+        <a href="signup.html" id="navSigupBtn" class="btn-solid-nav"><i class="fas fa-user-plus"></i> Sign up</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <i class="fas fa-graduation-cap"></i> Study smarter, together
+          </div>
+          <h1>Connect. Collaborate.<br> 
+            <span class="hero-highlight">Master your courses</span>
+          </h1>
+          <p>Create or join study groups, share resources, and ace exams with peers from your campus. Real collaboration, real results.</p>
+          <div class="hero-buttons">
+            <a href="login.html"><button class="btn-primary" id="heroLognBtn"><i class="fas fa-door-open"></i> Login</button></a>
+            <a href="signup.html"><button class="btn-secondary" id="heroSinupBtn"><i class="fas fa-user-edit"></i> Sign up</button></a>
+          </div>
+        </div>
+        <div class="hero-illustration">
+          <i class="fas fa-chalkboard-user"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about">
+      <div class="container">
+        <h2 class="section-title">About StudyCircle</h2>
+        <div class="section-sub">Empowering students to learn together, anytime, anywhere</div>
+        <div class="about-grid">
+          <div class="about-text">
+            <p><strong>StudyCircle</strong> was born from a simple idea: studying in groups boosts motivation, deepens understanding, and makes learning fun. Our platform helps you find study partners based on subjects, location, and schedule.</p>
+            <p>Whether you're preparing for finals, working on a group project, or just need accountability, StudyCircle gives you the tools to create focused study groups, share notes, and chat in real time.</p>
+            <div class="about-feature">
+              <i class="fas fa-rocket"></i>
+              <span>🔥 500+ active study groups created</span>
+            </div>
+            <div class="about-feature">
+              <i class="fas fa-globe"></i>
+              <span>🌍 Connect with students across multiple campuses</span>
+            </div>
+          </div>
+          <div class="about-stats">
+            <div class="stat-item">
+              <div class="stat-number">98%</div>
+              <p>improved grades</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">1.2k+</div>
+              <p>active members</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">35+</div>
+              <p>subjects covered</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">24/7</div>
+              <p>group access</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team Section (5 members) -->
+    <section id="team" style="background: #fafcff;">
+      <div class="container">
+        <h2 class="section-title">Meet the team</h2>
+        <div class="section-sub">Five dedicated students building the future of collaborative learning</div>
+        <div class="team-grid">
+          <!-- Team member 1 -->
+          <div class="team-card">
+            <div class="team-icon"><i class="fas fa-user-circle"></i></div>
+            <h3>Ibrahim ustaz</h3>
+            <div class="team-role">Project Lead & UI Architect</div>
+            <div class="team-bio">Passionate about intuitive design and seamless user journeys.</div>
+          </div>
+          <!-- Team member 2 -->
+          <div class="team-card">
+            <div class="team-icon"><i class="fas fa-code"></i></div>
+            <h3>Ahmad musa</h3>
+            <div class="team-role">Lead Developer</div>
+            <div class="team-bio">Full-stack enthusiast, ensures fast & reliable group features.</div>
+          </div>
+          <!-- Team member 3 -->
+          <div class="team-card">
+            <div class="team-icon"><i class="fas fa-database"></i></div>
+            <h3>Fatima Khan</h3>
+            <div class="team-role">Firebase Expert</div>
+            <div class="team-bio">Real-time sync & secure authentication specialist.</div>
+          </div>
+          <!-- Team member 4 -->
+          <div class="team-card">
+            <div class="team-icon"><i class="fas fa-paintbrush-fine"></i></div>
+            <h3>musa yusuf</h3>
+            <div class="team-role">UX/UI Designer</div>
+            <div class="team-bio">Creates beautiful, accessible experiences for students.</div>
+          </div>
+          <!-- Team member 5 -->
+          <div class="team-card">
+            <div class="team-icon"><i class="fas fa-chart-line"></i></div>
+            <h3>Aisha Patel</h3>
+            <div class="team-role">QA & Community Manager</div>
+            <div class="team-bio">Ensures quality and connects with study group feedback.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+      <div class="container">
+        <h2 class="section-title">Get in touch</h2>
+        <div class="section-sub">Have questions or ideas? We'd love to hear from you</div>
+        <div class="contact-wrapper">
+          <form id="contactForm">
+            <div class="form-group">
+              <label for="name"><i class="far fa-user"></i> Full name</label>
+              <input type="text" id="name" name="name" placeholder="Your name" required>
+            </div>
+            <div class="form-group">
+              <label for="email"><i class="far fa-envelope"></i> Email address</label>
+              <input type="email" id="email" name="email" placeholder="you@university.com" required>
+            </div>
+            <div class="form-group">
+              <label for="message"><i class="far fa-comment-dots"></i> Message</label>
+              <textarea id="message" name="message" rows="4" placeholder="Tell us about your study group needs..." required></textarea>
+            </div>
+            <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Send message</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p><i class="fas fa-graduation-cap"></i> StudyCircle — where knowledge meets collaboration</p>
+      <p>© 2025 StudyCircle Team. All rights reserved. | Designed for students, by students</p>
+    </div>
+  </footer>
+
+  <script>
+    // Helper: demo alert for Login / Signup actions (since landing page only)
+    function showComingSoonAlert(action) {
+      alert(`✨ "${action}" feature is under development.\n\n📌 In the full app, you'll be redirected to ${action.toLowerCase()} page.\n\nStay tuned for the complete study group platform!`);
+    }
+
+    // Attach events to all login / signup buttons (nav + hero)
+    const loginButtons = document.querySelectorAll('#navLoginBtn, #heroLoginBtn');
+    const signupButtons = document.querySelectorAll('#navSignupBtn, #heroSignupBtn');
+
+    loginButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        showComingSoonAlert('Login');
+      });
+    });
+
+    signupButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        showComingSoonAlert('Sign up');
+      });
+    });
+
+    // Contact form submission (demo, just success alert)
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+      contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const message = document.getElementById('message').value.trim();
+        
+        if (!name || !email || !message) {
+          alert('❌ Please fill in all fields before sending.');
+          return;
+        }
+        
+        // simple email pattern check
+        const emailPattern = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+        if (!emailPattern.test(email)) {
+          alert('⚠️ Please enter a valid email address (e.g., name@domain.com).');
+          return;
+        }
+        
+        alert(`✅ Thanks ${name}! Your message has been received.\n\n📬 We'll get back to you at ${email} soon.\n\n( Demo mode — fully functional landing page )`);
+        contactForm.reset();
+      });
+    }
+
+    // Smooth scroll for navigation links (Home, About, Team, Contact)
+    const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+    navLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        if (targetId && targetId !== '#') {
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            e.preventDefault();
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            });
+          }
+        }
+      });
+    });
+
+    // For any external direct hash linking (if page loaded with #)
+    if (window.location.hash) {
+      const initialHash = window.location.hash;
+      const targetElem = document.querySelector(initialHash);
+      if (targetElem) {
+        setTimeout(() => {
+          targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+
+    // Add small dynamic year to footer
+    const footerPara = document.querySelector('.footer p:last-child');
+    if (footerPara) {
+      const currentYear = new Date().getFullYear();
+      footerPara.innerHTML = footerPara.innerHTML.replace('2025', currentYear);
+    }
+
+    // Optional: subtle active nav highlight on scroll (simple)
+    const sections = document.querySelectorAll('section[id]');
+    function highlightNav() {
+      const scrollY = window.pageYOffset;
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        const sectionBottom = sectionTop + section.offsetHeight;
+        if (scrollY >= sectionTop && scrollY < sectionBottom) {
+          current = section.getAttribute('id');
+        }
+      });
+      const navAnchors = document.querySelectorAll('.nav-links a');
+      navAnchors.forEach(anchor => {
+        anchor.classList.remove('active-nav-style');
+        const hrefAttr = anchor.getAttribute('href');
+        if (hrefAttr === `#${current}`) {
+          anchor.style.color = 'var(--primary)';
+          anchor.style.fontWeight = '600';
+        } else if (!anchor.classList.contains('btn-outline-nav') && !anchor.classList.contains('btn-solid-nav')) {
+          anchor.style.color = '#1e293b';
+          anchor.style.fontWeight = '500';
+        }
+      });
+    }
+    window.addEventListener('scroll', highlightNav);
+    window.addEventListener('load', highlightNav);
+    
+    // Add a tiny style for active nav (fallback)
+    const styleActive = document.createElement('style');
+    styleActive.textContent = `
+      .nav-links a.active-nav-style {
+        color: #3b82f6 !important;
+        font-weight: 600;
+      }
+      .nav-links a:not(.btn-outline-nav):not(.btn-solid-nav) {
+        transition: 0.2s;
+      }
+    `;
+    document.head.appendChild(styleActive);
+  </script>
+</body>
+</html>
